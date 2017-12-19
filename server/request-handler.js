@@ -14,10 +14,10 @@ this file and include it in basic-server.js so that it actually works.
 var toGet = {};
 toGet.results = [];
 var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'content-type, accept',
+  'Access-Control-Max-Age': 10 // Seconds.
 };
 var requestHandler = (request, response) => {
   // Request and Response come from node's http module.
@@ -58,45 +58,33 @@ var requestHandler = (request, response) => {
   var url = require('url');
   var myUrl = url.parse(request.url);
   headers['Content-Type'] = 'application/json';
+  headers['Access-Control-Allow-Headers'] = 'X-Parse-Application-Id, X-Parse-REST-API-Key, Content-Type, Accept';
 
-  if (request.method === 'GET') {
-    console.log('path name', myUrl.pathname);
-    if (myUrl.pathname !== '/classes/messages') {
-      response.statusCode = 404;
-      // console.error('error');
-    } else {
-      response.statusCode = 200;
-    }
 
-    console.log(JSON.stringify(toGet));    
-    response.writeHead(response.statusCode);
-    response.end(JSON.stringify(toGet));
-  } 
+  if (request.method === 'OPTIONS') {
+    response.writeHead(200, headers);
+    response.end();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+  }
+  // if (request.method === 'GET') {
+  //   // if (myUrl.pathname !== '/classes/messages') {
+  //   //   response.statusCode = 404;
+  //   // } else {
+  //   response.statusCode = 200;
+  //   // }
+  //   response.writeHead(response.statusCode, headers);
+  //   response.end(JSON.stringify(toGet));
+  // } 
   if (request.method === 'POST') {
 
     const { headers, method, url } = request;
     let body = '';
-    let results = [];
     request.on('data', (chunk) => {
       body += chunk;
     });
-
     request.on('end', () => {
-
-      // response.on('error', (error) => {
-      //   console.error(error);
-      // });
-
-      // if (body !== '') {
-      //   results.push(JSON.parse(body));
       toGet.results.push(JSON.parse(body));
-      // }
-      // var uri = 'http://' + headers.host + '/classes/messages';
-
-
-      const responseBody = { headers, method, url, results };
-      // response.writeHead(statusCode, headers); 
-      console.log(responseBody);
+      const responseBody = { headers, method, url, body };
       if (myUrl.pathname.indexOf('/classes') === -1) {
         response.statusCode = 404;
         console.error('error');
@@ -104,9 +92,18 @@ var requestHandler = (request, response) => {
         response.statusCode = 201;
       }
       response.writeHead(response.statusCode);
-      response.end(JSON.stringify(responseBody));
+      response.end(JSON.stringify(toGet));
     });
-  }  
+  }
+  if (request.method === 'GET') {
+    if (myUrl.pathname !== '/classes/messages') {
+      response.statusCode = 404;
+    } else {
+      response.statusCode = 200;
+    }
+    response.writeHead(response.statusCode, headers);
+    response.end(JSON.stringify(toGet));
+  }   
 
 };
 
