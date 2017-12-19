@@ -3,7 +3,7 @@ var app = {
 
   //TODO: The current 'handleUsernameClick' function just toggles the class 'friend'
   //to all messages sent by the user
-  server: 'http://parse.CAMPUS.hackreactor.com/chatterbox/classes/messages',
+  server: 'http://127.0.0.1:3000/',
   username: 'anonymous',
   roomname: 'lobby',
   lastMessageId: 0,
@@ -68,6 +68,7 @@ var app = {
 
         // Store messages for caching later
         app.messages = data.results;
+        console.log(data);
 
         // Get the last message
         var mostRecentMessage = data.results[data.results.length - 1];
