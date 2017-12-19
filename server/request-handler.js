@@ -11,7 +11,6 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-// var results = require('./Results.js');
 var toGet = {};
 toGet.results = [];
 var defaultCorsHeaders = {
@@ -37,17 +36,6 @@ var requestHandler = (request, response) => {
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  // response.setHeader('Content-Type', 'application/json');
-  // response.setHeader('access-control-allow-headers', 'X-Parse-Application-Id, X-Parse-REST-API-Key, content-type');
-  // response.setHeader('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  // response.setHeader('access-control-allow-origin', '*');
-  // response.setHeader('access-control-max-age', 10);
-
-  // The outgoing status.
-  // var method = request.method;
-  // var url = request.url;
- // if endpoint (?) is nonexistent, change this to 404
-
   // See the note below about CORS headers.
   // var headers = defaultCorsHeaders;
 
@@ -57,11 +45,6 @@ var requestHandler = (request, response) => {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-
-    // might need a request listener function?
 
     // Make sure to always call response.end() - Node may not send
     // anything back to the client until you do. The string you pass to
@@ -76,61 +59,54 @@ var requestHandler = (request, response) => {
   var myUrl = url.parse(request.url);
   headers['Content-Type'] = 'application/json';
 
- 
-    // will later add control flow for bad requests (404 error etc)
   if (request.method === 'GET') {
     console.log('path name', myUrl.pathname);
     if (myUrl.pathname !== '/classes/messages') {
       response.statusCode = 404;
-      console.error('error');
+      // console.error('error');
     } else {
       response.statusCode = 200;
     }
 
-    // const responseBody = { headers, method, url, toGet};
     console.log(JSON.stringify(toGet));    
-    // response.writeHead(statusCode, headers);
     response.writeHead(response.statusCode);
     response.end(JSON.stringify(toGet));
-    // });
   } 
   if (request.method === 'POST') {
-    if (myUrl.pathname !== '/classes/messages') {
-      response.statusCode = 404;
-      console.error('error');
-    } else {
-      response.statusCode = 201;
-    }
+
     const { headers, method, url } = request;
     let body = '';
     let results = [];
-    request.on('error', (error) => {
-      console.error(error);
-    }).on('data', (chunk) => {
+    request.on('data', (chunk) => {
       body += chunk;
-    }).on('end', () => {
+    });
 
-      response.on('error', (error) => {
-        console.error(error);
-      });
+    request.on('end', () => {
 
-      if (body !== '') {
-        results.push(JSON.parse(body));
-        toGet.results.push(JSON.parse(body));
-      }
+      // response.on('error', (error) => {
+      //   console.error(error);
+      // });
+
+      // if (body !== '') {
+      //   results.push(JSON.parse(body));
+      toGet.results.push(JSON.parse(body));
+      // }
+      // var uri = 'http://' + headers.host + '/classes/messages';
+
+
       const responseBody = { headers, method, url, results };
-      // response.writeHead(statusCode, headers);
+      // response.writeHead(statusCode, headers); 
       console.log(responseBody);
+      if (myUrl.pathname.indexOf('/classes') === -1) {
+        response.statusCode = 404;
+        console.error('error');
+      } else {
+        response.statusCode = 201;
+      }
+      response.writeHead(response.statusCode);
       response.end(JSON.stringify(responseBody));
     });
   }  
-  // if (request.url !== '/classes/messages') {
-  //   response.statusCode = 404;
-  // }
-
-
-
- // send back something like '{results: [{message}, {message}]}''
 
 };
 
@@ -143,13 +119,6 @@ var requestHandler = (request, response) => {
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-// var defaultCorsHeaders = {
-//   'access-control-allow-origin': '*',
-//   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-//   'access-control-allow-headers': 'content-type, accept',
-//   'access-control-max-age': 10 // Seconds.
-// };
 
 exports.requestHandler = requestHandler;
-exports.defaultCorsHeaders = defaultCorsHeaders;
 
