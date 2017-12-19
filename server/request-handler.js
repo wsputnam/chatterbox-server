@@ -11,7 +11,8 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var results = require('./Results.js');
+var results = [];
+// var results = require('./Results.js');
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -36,7 +37,7 @@ var requestHandler = (request, response) => {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   
-
+  
   // The outgoing status.
   // var method = request.method;
   // var url = request.url;
@@ -79,7 +80,15 @@ var requestHandler = (request, response) => {
     // response.end('Hello, World!');
     
     // will later add control flow for bad requests (404 error etc)
-    response.statusCode = 200;
+    if (request.method === 'GET') {
+      response.statusCode = 200;
+    }
+    if (request.method === 'POST') {
+      response.statusCode = 201;
+    }
+    if (request.url === undefined || request.url === null) {
+      response.statuscode = 404;
+    }
     response.setHeader('Content-Type', 'application/json');
     response.setHeader('access-control-allow-headers', 'X-Parse-Application-Id, X-Parse-REST-API-Key, content-type');
     response.setHeader('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -89,7 +98,7 @@ var requestHandler = (request, response) => {
 
     // response.writeHead(statusCode, headers);
 
-    results.results.push(body);
+    results.push(body);
     const responseBody = { headers, method, url, results };
     response.end(JSON.stringify(responseBody));
 
