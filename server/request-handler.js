@@ -11,8 +11,9 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var results = [];
 // var results = require('./Results.js');
+var toGet = {};
+toGet.results = [];
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -36,8 +37,12 @@ var requestHandler = (request, response) => {
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  
-  
+  // response.setHeader('Content-Type', 'application/json');
+  // response.setHeader('access-control-allow-headers', 'X-Parse-Application-Id, X-Parse-REST-API-Key, content-type');
+  // response.setHeader('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // response.setHeader('access-control-allow-origin', '*');
+  // response.setHeader('access-control-max-age', 10);
+
   // The outgoing status.
   // var method = request.method;
   // var url = request.url;
@@ -52,18 +57,6 @@ var requestHandler = (request, response) => {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  const { headers, method, url } = request;
-  let body = [];
-  request.on('error', (error) => {
-    console.error(error);
-  }).on('data', (chunk) => {
-    body.push(chunk);
-  }).on('end', () => {
-    body = Buffer.concat(body).toString();
-
-    response.on('error', (error) => {
-      console.error(error);
-    });
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -78,33 +71,67 @@ var requestHandler = (request, response) => {
     // Calling .end "flushes" the response's internal buffer, forcing
     // node to actually send all the data over to the client.
     // response.end('Hello, World!');
-    
+  var headers = defaultCorsHeaders;
+  var url = require('url');
+  var myUrl = url.parse(request.url);
+  headers['Content-Type'] = 'application/json';
+
+ 
     // will later add control flow for bad requests (404 error etc)
-    if (request.method === 'GET') {
+  if (request.method === 'GET') {
+    console.log('path name', myUrl.pathname);
+    if (myUrl.pathname !== '/classes/messages') {
+      response.statusCode = 404;
+      console.error('error');
+    } else {
       response.statusCode = 200;
     }
-    if (request.method === 'POST') {
+
+    // const responseBody = { headers, method, url, toGet};
+    console.log(JSON.stringify(toGet));    
+    // response.writeHead(statusCode, headers);
+    response.writeHead(response.statusCode);
+    response.end(JSON.stringify(toGet));
+    // });
+  } 
+  if (request.method === 'POST') {
+    if (myUrl.pathname !== '/classes/messages') {
+      response.statusCode = 404;
+      console.error('error');
+    } else {
       response.statusCode = 201;
     }
-    if (request.url === undefined || request.url === null) {
-      response.statuscode = 404;
-    }
-    response.setHeader('Content-Type', 'application/json');
-    response.setHeader('access-control-allow-headers', 'X-Parse-Application-Id, X-Parse-REST-API-Key, content-type');
-    response.setHeader('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.setHeader('access-control-allow-origin', '*');
-    response.setHeader('access-control-max-age', 10);
-    // headers['Content-Type'] = 'application/json';
+    const { headers, method, url } = request;
+    let body = '';
+    let results = [];
+    request.on('error', (error) => {
+      console.error(error);
+    }).on('data', (chunk) => {
+      body += chunk;
+    }).on('end', () => {
 
-    // response.writeHead(statusCode, headers);
+      response.on('error', (error) => {
+        console.error(error);
+      });
 
-    results.push(body);
-    const responseBody = { headers, method, url, results };
-    response.end(JSON.stringify(responseBody));
+      if (body !== '') {
+        results.push(JSON.parse(body));
+        toGet.results.push(JSON.parse(body));
+      }
+      const responseBody = { headers, method, url, results };
+      // response.writeHead(statusCode, headers);
+      console.log(responseBody);
+      response.end(JSON.stringify(responseBody));
+    });
+  }  
+  // if (request.url !== '/classes/messages') {
+  //   response.statusCode = 404;
+  // }
+
+
 
  // send back something like '{results: [{message}, {message}]}''
 
-  });
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
