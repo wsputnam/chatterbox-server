@@ -66,15 +66,7 @@ var requestHandler = (request, response) => {
     response.end();
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
   }
-  // if (request.method === 'GET') {
-  //   // if (myUrl.pathname !== '/classes/messages') {
-  //   //   response.statusCode = 404;
-  //   // } else {
-  //   response.statusCode = 200;
-  //   // }
-  //   response.writeHead(response.statusCode, headers);
-  //   response.end(JSON.stringify(toGet));
-  // } 
+
   if (request.method === 'POST') {
 
     const { headers, method, url } = request;
@@ -83,14 +75,14 @@ var requestHandler = (request, response) => {
       body += chunk;
     });
     request.on('end', () => {
-      toGet.results.push(JSON.parse(body));
-      const responseBody = { headers, method, url, body };
+
       if (myUrl.pathname.indexOf('/classes') === -1) {
         response.statusCode = 404;
         console.error('error');
       } else {
         response.statusCode = 201;
       }
+      toGet.results.push(JSON.parse(body));
       response.writeHead(response.statusCode);
       response.end(JSON.stringify(toGet));
     });

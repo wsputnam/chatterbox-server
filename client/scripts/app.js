@@ -36,7 +36,7 @@ var app = {
   },
 
   send: function(message) {
-    app.startSpinner();
+    // app.startSpinner();
 
     // POST the message to the server
     $.ajax({
